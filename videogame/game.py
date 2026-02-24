@@ -61,16 +61,23 @@ class aim_assist(VideoGame):
                 background_color = colors.black,
                 soundtrack = assets.get('soundtrack')
                 ),
-                scene.GameScene(
+                scene.FreemodeScene(
                 screen = self._screen,
                 background_color = colors.black,
-                soundtrack = assets.get('soundtrack')
                 ),
-                scene.GameOverScene(
+                scene.TimedScene(
                 screen = self._screen,
                 background_color = colors.black,
-                soundtrack = assets.get('game-over-theme')
-                )
+                ),
+                scene.RushScene(
+                screen = self._screen,
+                background_color = colors.black,
+                ),
+                scene.RandomScene(
+                screen = self._screen,
+                background_color = colors.black,
+                ),
+                
             ]
         )
 

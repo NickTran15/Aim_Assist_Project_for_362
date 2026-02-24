@@ -4,12 +4,10 @@ import pygame
 import random
 from videogame import assets
 from videogame import colors
-#from videogame import player
 from videogame import target
 
 
 class Scene:
-    """Base class for making PyGame Scenes."""
 
     def __init__(
         self, screen, background_color, screen_flags=None, soundtrack=None
@@ -33,8 +31,6 @@ class Scene:
 
     def process_event(self, event):
         """Process a game event by the scene."""
-        # This should be commented out or removed since it generates a lot of noise.
-        # print(str(event))
         if event.type == pygame.QUIT:
             print("Good Bye!")
             self._is_valid = False
