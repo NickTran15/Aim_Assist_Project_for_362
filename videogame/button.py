@@ -1,6 +1,6 @@
 "DONE"
 
-#Handles menu button functions
+#Handles all button functions
 
 import pygame
 
@@ -27,3 +27,5 @@ class Button():
 
         surface.blit(self.image, (self.rect.x, self.rect.y))
         return action
+    
+    
