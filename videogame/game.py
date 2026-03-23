@@ -1,9 +1,8 @@
-"""Game objects to create PyGame based games."""
+"Game Logic"
 
-import warnings
 import pygame
 from videogame import assets
-from videogame import colors
+from videogame import color_library
 from videogame import scene
 from videogame import scenemanager
 
@@ -15,15 +14,13 @@ def display_info():
 
 
 class VideoGame:
-    """Base class for creating PyGame games."""
 
     def __init__(
         self,
-        window_width=800,
-        window_height=800,
-        window_title="Galaga",
+        window_width=1250,
+        window_height=750,
+        window_title="Aim_Assist",
     ):
-        """Initialize a new game with the given window size and window title."""
         pygame.init()
         self._window_size = (window_width, window_height)
         self._clock = pygame.time.Clock()
@@ -31,53 +28,52 @@ class VideoGame:
         self._title = window_title
         pygame.display.set_caption(self._title)
         self._game_is_over = False
-        if not pygame.font:
-            warnings.warn("Fonts disabled.", RuntimeWarning)
-        if not pygame.mixer:
-            warnings.warn("Sound disabled.", RuntimeWarning)
-        else:
-            pygame.mixer.init()
-        self._scene_manager = None
 
     def run(self):
-        """Run the game; the main game loop."""
         raise NotImplementedError
 
 
 
-class aim_assist(VideoGame):
+class Aim_Assist(VideoGame):
     def __init__(self):
-        """Init the Pygame demo."""
         super().__init__(window_title="Aim Assist")
         self._scene_manager = scenemanager.SceneManager(
             [
                 scene.TitleScene(
                 screen = self._screen,
-                background_color = colors.black,
+                background_color = color_library.black,
+                soundtrack = None,
+                ),
+
+                scene.MainMenuScene(
+                screen = self._screen,
+                background_color = color_library.gray_teal,
+                soundtrack = None
+                ),"""
+
+                scene.TitleScene(
+                screen = self._screen,
+                background_color = color_library.black,
                 soundtrack = assets.get('title-theme'),
                 ),
+
                 scene.ControlScene(
                 screen = self._screen,
-                background_color = colors.black,
+                background_color = color_library.black,
                 soundtrack = assets.get('soundtrack')
                 ),
-                scene.FreemodeScene(
+
+                scene.GameScene(
                 screen = self._screen,
-                background_color = colors.black,
+                background_color = color_library.black,
+                soundtrack = assets.get('soundtrack')
                 ),
-                scene.TimedScene(
+
+                scene.GameOverScene(
                 screen = self._screen,
-                background_color = colors.black,
-                ),
-                scene.RushScene(
-                screen = self._screen,
-                background_color = colors.black,
-                ),
-                scene.RandomScene(
-                screen = self._screen,
-                background_color = colors.black,
-                ),
-                
+                background_color = color_library.black,
+                soundtrack = assets.get('game-over-theme')
+                )"""
             ]
         )
 
