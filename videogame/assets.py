@@ -13,4 +13,4 @@ def get(key):
     value = asset_dict[key]
     value = path.join(data_dir, value)
     assert path.exists(value)
-    return valu
+    return value
