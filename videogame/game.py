@@ -1,6 +1,7 @@
 "Game Logic"
 
 import pygame
+from videogame import assets
 from videogame import color_library
 from videogame import scene
 from videogame import scenemanager
