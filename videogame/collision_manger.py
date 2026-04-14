@@ -1,3 +1,4 @@
+
 import pygame
 
 def handle_click(mouse_position, targets_group, scoreboard):

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+#source venv/bin/activate
 import sys
 from videogame import game
  

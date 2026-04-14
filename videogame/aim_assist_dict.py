@@ -9,7 +9,10 @@ aim_assist_asset_dict = {
     'quit': "quit.png",
     'menu-screen': "menuscreen.png",
     'menu-title': "menutitle.png",
-    'easy-button': "easy.png",
-    'medium-button': "medium.png",
-    'hard-button': "hard.png",
+    'easy': "easy.png",
+    'medium': "medium.png",
+    'hard': "hard.png",
+    'pixel-font': "pixel-font.ttf",
+    'retry': "retry.png",
+    'main': "mainmenu.png"
 }

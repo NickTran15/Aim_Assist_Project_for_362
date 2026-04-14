@@ -1,7 +1,6 @@
 "Game Logic"
 
 import pygame
-from videogame import assets
 from videogame import color_library
 from videogame import scene
 from videogame import scenemanager
@@ -49,31 +48,43 @@ class Aim_Assist(VideoGame):
                 screen = self._screen,
                 background_color = color_library.gray_teal,
                 soundtrack = None
+                ),
+                
+                scene.DifficultyScene(
+                screen = self._screen,
+                background_color = color_library.gray_teal,
+                soundtrack = None
+                ),
+
+                scene.Freemode(
+                screen = self._screen,
+                background_color = color_library.sky_blue,
+                soundtrack = None,
+                ),
+                
+                scene.MainMenuScene(
+                screen = self._screen,
+                background_color = color_library.gray_teal,
+                soundtrack = None
                 ),"""
-
-                scene.TitleScene(
+                scene.Rush(
                 screen = self._screen,
-                background_color = color_library.black,
-                soundtrack = assets.get('title-theme'),
+                background_color = color_library.sky_blue,
+                soundtrack = None,
                 ),
 
-                scene.ControlScene(
+                scene.Tracker(
                 screen = self._screen,
-                background_color = color_library.black,
-                soundtrack = assets.get('soundtrack')
+                background_color = color_library.sky_blue,
+                soundtrack = None,
                 ),
 
-                scene.GameScene(
+                scene.Random(
                 screen = self._screen,
-                background_color = color_library.black,
-                soundtrack = assets.get('soundtrack')
-                ),
-
-                scene.GameOverScene(
-                screen = self._screen,
-                background_color = color_library.black,
-                soundtrack = assets.get('game-over-theme')
+                background_color = color_library.sky_blue,
+                soundtrack = None,
                 )"""
+                
             ]
         )
 
@@ -81,6 +92,9 @@ class Aim_Assist(VideoGame):
         """Run the game; the main game loop."""
         scene_iterator = iter(self._scene_manager)
         current_scene = next(scene_iterator)
+        selected_mode = None
+        selected_difficulty = None
+        
         while not self._game_is_over:
             current_scene.start_scene()
             while current_scene.is_valid():
@@ -92,6 +106,39 @@ class Aim_Assist(VideoGame):
                 current_scene.update_scene()
                 current_scene.draw()
                 pygame.display.update()
+            
+            # Capture selections before moving to next scene
+            if isinstance(current_scene, scene.MainMenuScene):
+                selected_mode = current_scene.get_selected_mode()
+            elif isinstance(current_scene, scene.DifficultyScene):
+                selected_difficulty = current_scene.get_selected_difficulty()
+                # Create game scene based on selections
+                if selected_mode == "freemode" and selected_difficulty:
+                    current_scene = scene.Freemode(
+                        self._screen,
+                        color_library.sky_blue,
+                        difficulty=selected_difficulty
+                    )
+                    current_scene.end_scene()
+                    continue
+            elif isinstance(current_scene, scene.Freemode):
+                # Handle Freemode button actions
+                if current_scene.is_retry_clicked():
+                    # Restart Freemode with same difficulty
+                    current_scene = scene.Freemode(
+                        self._screen,
+                        color_library.sky_blue,
+                        difficulty=selected_difficulty
+                    )
+                    current_scene.end_scene()
+                    continue
+                elif current_scene.is_main_clicked():
+                    # Go back to main menu - create fresh scene manager iterator
+                    scene_iterator = iter(self._scene_manager)
+                    next(scene_iterator)  # Skip TitleScene
+                    current_scene = next(scene_iterator)  # MainMenuScene
+                    continue
+            
             current_scene.end_scene()
             try:
                 current_scene = next(scene_iterator)

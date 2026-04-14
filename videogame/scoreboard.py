@@ -1,19 +1,20 @@
 # Scoreboard for Aim Assist Game
 
 import pygame
+from videogame import assets
 
 class Scoreboard:
     """
     Keeps track of hits, misses, and displays accuracy on the screen.
     """
-
     def __init__(self, x=20, y=20, font_size=30):
         # Track stats
         self.hits = 0
         self.misses = 0
 
-        # Set up drawing text
-        self.font = pygame.font.SysFont("Arial", font_size)
+        # Set up drawing text with custom font from assets
+        font_path = assets.get('pixel-font')
+        self.font = pygame.font.Font(font_path, font_size)
 
         # Position for where the scoreboard will be drawn
         self.position = (x, y)

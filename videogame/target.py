@@ -9,13 +9,13 @@ from videogame import color_library
 class Target(pygame.sprite.Sprite):
     """A clickable target that disappears when clicked."""
 
-    # Concentric ring colors (outermost to innermost)
+    # Ring colors
     RING_COLORS = [
-        (220, 50, 50),    # red outer
-        (255, 255, 255),  # white
-        (220, 50, 50),    # red
-        (255, 255, 255),  # white
-        (220, 50, 50),    # red center
+        color_library.red,
+        color_library.white,
+        color_library.red,
+        color_library.white,
+        color_library.red,
     ]
 
     def __init__(self, x, y, radius=35):
