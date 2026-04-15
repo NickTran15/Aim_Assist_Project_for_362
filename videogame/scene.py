@@ -2,7 +2,7 @@
 #git config pull.rebase false
 #
 import pygame
-from videogame import assets, color_library, button, target, scoreboard
+from videogame import assets, color_library, button, target, scoreboard, particle
 import random
 
 
