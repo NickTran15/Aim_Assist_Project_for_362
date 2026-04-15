@@ -186,6 +186,7 @@ class Freemode(Scene):
         self._total_spawned = 0
         self._max_targets = 150
         self._scoreboard = scoreboard.Scoreboard()
+        self._particle_system = ParticleSystem()
         
         #Creates retry and main menu buttons
         retry_image = pygame.image.load(assets.get('retry'))
@@ -252,7 +253,8 @@ class Freemode(Scene):
         for target in targets_to_remove:
             self._scoreboard.record_miss()
             self._targets.remove(target)
-        
+
+        self._particle_system.update()
         self._targets.update()
 
     def _spawn_target(self):
@@ -266,6 +268,7 @@ class Freemode(Scene):
     def draw(self):
         super().draw()
         self._targets.draw(self._screen)
+        self._particle_system.draw(self._screen)
         self._scoreboard.draw(self._screen)
         
         # Show retry and main buttons when all targets are spawned
@@ -289,6 +292,7 @@ class Freemode(Scene):
                 if not target.is_clicked() and target.contains_point(event.pos):
                     target.click()
                     self._scoreboard.record_hit()
+                    self._particle_system.emit(*event.pos, color=(220, 50, 50))  # particle hit
                     self._targets.remove(target)
     
     def is_retry_clicked(self):
