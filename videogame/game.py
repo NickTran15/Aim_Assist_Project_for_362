@@ -1,7 +1,6 @@
 "Game Logic"
 
 import pygame
-from videogame import assets
 from videogame import color_library
 from videogame import scene
 from videogame import scenemanager
@@ -63,18 +62,8 @@ class Aim_Assist(VideoGame):
                 soundtrack = None,
                 ),
                 
-                scene.MainMenuScene(
-                screen = self._screen,
-                background_color = color_library.gray_teal,
-                soundtrack = None
-                ),"""
+                
                 scene.Rush(
-                screen = self._screen,
-                background_color = color_library.sky_blue,
-                soundtrack = None,
-                ),
-
-                scene.Tracker(
                 screen = self._screen,
                 background_color = color_library.sky_blue,
                 soundtrack = None,
@@ -84,7 +73,7 @@ class Aim_Assist(VideoGame):
                 screen = self._screen,
                 background_color = color_library.sky_blue,
                 soundtrack = None,
-                )"""
+                )
                 
             ]
         )
@@ -122,22 +111,53 @@ class Aim_Assist(VideoGame):
                     )
                     current_scene.end_scene()
                     continue
-            elif isinstance(current_scene, scene.Freemode):
-                # Handle Freemode button actions
-                if current_scene.is_retry_clicked():
-                    # Restart Freemode with same difficulty
-                    current_scene = scene.Freemode(
+                elif selected_mode == "rush" and selected_difficulty:
+                    current_scene = scene.Rush(
                         self._screen,
                         color_library.sky_blue,
                         difficulty=selected_difficulty
                     )
                     current_scene.end_scene()
                     continue
+            elif isinstance(current_scene, scene.Freemode):
+                # Handle Freemode button actions
+                if current_scene.is_retry_clicked():
+                    # Restart Freemode with same difficulty
+                    current_scene.end_scene()
+                    current_scene = scene.Freemode(
+                        self._screen,
+                        color_library.sky_blue,
+                        difficulty=selected_difficulty
+                    )
+                    continue
                 elif current_scene.is_main_clicked():
-                    # Go back to main menu - create fresh scene manager iterator
-                    scene_iterator = iter(self._scene_manager)
-                    next(scene_iterator)  # Skip TitleScene
-                    current_scene = next(scene_iterator)  # MainMenuScene
+                    # Go back to main menu
+                    current_scene.end_scene()
+                    current_scene = scene.MainMenuScene(
+                        self._screen,
+                        color_library.gray_teal,
+                        soundtrack=None
+                    )
+                    continue
+            elif isinstance(current_scene, scene.Rush):
+                # Handle Rush button actions
+                if current_scene.is_retry_clicked():
+                    # Restart Rush with same difficulty
+                    current_scene.end_scene()
+                    current_scene = scene.Rush(
+                        self._screen,
+                        color_library.sky_blue,
+                        difficulty=selected_difficulty
+                    )
+                    continue
+                elif current_scene.is_main_clicked():
+                    # Go back to main menu
+                    current_scene.end_scene()
+                    current_scene = scene.MainMenuScene(
+                        self._screen,
+                        color_library.gray_teal,
+                        soundtrack=None
+                    )
                     continue
             
             current_scene.end_scene()
