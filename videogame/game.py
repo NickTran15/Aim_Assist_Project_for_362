@@ -87,6 +87,8 @@ class Aim_Assist(VideoGame):
         
         while not self._game_is_over:
             current_scene.start_scene()
+            
+            # Main scene loop
             while current_scene.is_valid():
                 current_scene.delta_time = self._clock.tick(
                     current_scene.frame_rate()
@@ -97,73 +99,100 @@ class Aim_Assist(VideoGame):
                 current_scene.draw()
                 pygame.display.update()
             
-            # Capture selections before moving to next scene
-            if isinstance(current_scene, scene.MainMenuScene):
-                selected_mode = current_scene.get_selected_mode()
-            elif isinstance(current_scene, scene.DifficultyScene):
-                selected_difficulty = current_scene.get_selected_difficulty()
-                # Create game scene based on selections
-                if selected_mode == "freemode" and selected_difficulty:
-                    current_scene = scene.Freemode(
-                        self._screen,
-                        color_library.sky_blue,
-                        difficulty=selected_difficulty
+            # Game scene has ended, show end-of-game screen with buttons
+            if isinstance(current_scene, (scene.Freemode, scene.Rush, scene.Random)):
+                game_over = True
+                while game_over:
+                    current_scene.delta_time = self._clock.tick(
+                        current_scene.frame_rate()
                     )
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            self._game_is_over = True
+                            game_over = False
+                        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                            # Escape goes back to main menu
+                            current_scene.end_scene()
+                            current_scene = scene.MainMenuScene(
+                                self._screen,
+                                color_library.gray_teal,
+                                soundtrack=None
+                            )
+                            selected_mode = None
+                            selected_difficulty = None
+                            game_over = False
+                        else:
+                            current_scene.process_event(event)
+                    current_scene.draw()
+                    pygame.display.update()
+                    
+                    # Check for button actions
+                    if current_scene.is_retry_clicked():
+                        # Restart game scene with same difficulty
+                        current_scene.end_scene()
+                        current_scene = type(current_scene)(
+                            self._screen,
+                            color_library.sky_blue,
+                            difficulty=selected_difficulty
+                        )
+                        game_over = False
+                    elif current_scene.is_main_clicked():
+                        # Go back to main menu
+                        current_scene.end_scene()
+                        current_scene = scene.MainMenuScene(
+                            self._screen,
+                            color_library.gray_teal,
+                            soundtrack=None
+                        )
+                        selected_mode = None
+                        selected_difficulty = None
+                        game_over = False
+            else:
+                # For non-game scenes (Title, MainMenu, Difficulty)
+                # Capture selections before moving to next scene
+                if isinstance(current_scene, scene.MainMenuScene):
+                    selected_mode = current_scene.get_selected_mode()
+                    # Move to difficulty scene
                     current_scene.end_scene()
-                    continue
-                elif selected_mode == "rush" and selected_difficulty:
-                    current_scene = scene.Rush(
-                        self._screen,
-                        color_library.sky_blue,
-                        difficulty=selected_difficulty
-                    )
-                    current_scene.end_scene()
-                    continue
-            elif isinstance(current_scene, scene.Freemode):
-                # Handle Freemode button actions
-                if current_scene.is_retry_clicked():
-                    # Restart Freemode with same difficulty
-                    current_scene.end_scene()
-                    current_scene = scene.Freemode(
-                        self._screen,
-                        color_library.sky_blue,
-                        difficulty=selected_difficulty
-                    )
-                    continue
-                elif current_scene.is_main_clicked():
-                    # Go back to main menu
-                    current_scene.end_scene()
-                    current_scene = scene.MainMenuScene(
+                    current_scene = scene.DifficultyScene(
                         self._screen,
                         color_library.gray_teal,
                         soundtrack=None
                     )
                     continue
-            elif isinstance(current_scene, scene.Rush):
-                # Handle Rush button actions
-                if current_scene.is_retry_clicked():
-                    # Restart Rush with same difficulty
-                    current_scene.end_scene()
-                    current_scene = scene.Rush(
-                        self._screen,
-                        color_library.sky_blue,
-                        difficulty=selected_difficulty
-                    )
-                    continue
-                elif current_scene.is_main_clicked():
-                    # Go back to main menu
-                    current_scene.end_scene()
-                    current_scene = scene.MainMenuScene(
-                        self._screen,
-                        color_library.gray_teal,
-                        soundtrack=None
-                    )
-                    continue
-            
-            current_scene.end_scene()
-            try:
-                current_scene = next(scene_iterator)
-            except StopIteration:
-                self._game_is_over = True
+                elif isinstance(current_scene, scene.DifficultyScene):
+                    selected_difficulty = current_scene.get_selected_difficulty()
+                    # Create game scene based on selections
+                    if selected_mode == "freemode" and selected_difficulty:
+                        current_scene.end_scene()
+                        current_scene = scene.Freemode(
+                            self._screen,
+                            color_library.sky_blue,
+                            difficulty=selected_difficulty
+                        )
+                        continue
+                    elif selected_mode == "rush" and selected_difficulty:
+                        current_scene.end_scene()
+                        current_scene = scene.Rush(
+                            self._screen,
+                            color_library.sky_blue,
+                            difficulty=selected_difficulty
+                        )
+                        continue
+                    elif selected_mode == "random" and selected_difficulty:
+                        current_scene.end_scene()
+                        current_scene = scene.Random(
+                            self._screen,
+                            color_library.sky_blue,
+                            difficulty=selected_difficulty
+                        )
+                        continue
+
+                current_scene.end_scene()
+                try:
+                    current_scene = next(scene_iterator)
+                except StopIteration:
+                    self._game_is_over = True
+        
         pygame.quit()
         return 0

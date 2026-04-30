@@ -2,7 +2,7 @@
 #git config pull.rebase false
 #
 import pygame
-from videogame import assets, color_library, button, target, scoreboard, particle
+from videogame import assets, color_library, button, target, scoreboard
 import random
 
 
@@ -91,15 +91,15 @@ class MainMenuScene(Scene):
     random_image = pygame.image.load(assets.get('random'))
     quit_image = pygame.image.load(assets.get('quit'))
 
-    freemode_button = button.Button(475, 200, freemode_image, 0.8)
-    rush_button = button.Button(475, 300, rush_image, 0.8)
-    random_button = button.Button(475, 400, random_image, 0.8)
-    quit_button = button.Button(475, 500, quit_image, 0.8)
     def __init__(self, screen, background_color, soundtrack=None):
         super().__init__(screen, background_color, soundtrack=soundtrack)
         self._background_image = pygame.image.load(assets.get('menu-title'))
         self._background_image = pygame.transform.scale(self._background_image, self._screen.get_size())
         self._selected_mode = None
+        self.freemode_button = button.Button(475, 200, self.freemode_image, 0.8)
+        self.rush_button = button.Button(475, 300, self.rush_image, 0.8)
+        self.random_button = button.Button(475, 400, self.random_image, 0.8)
+        self.quit_button = button.Button(475, 500, self.quit_image, 0.8)
 
 
     def draw(self):
@@ -136,14 +136,14 @@ class DifficultyScene(Scene):
     medium_image = pygame.image.load(assets.get('medium'))
     hard_image = pygame.image.load(assets.get('hard'))
 
-    easy_button = button.Button(200, 400, easy_image, 0.8)
-    medium_button = button.Button(500, 400, medium_image, 0.8)
-    hard_button = button.Button(800, 400, hard_image, 0.8)
     def __init__(self, screen, background_color, soundtrack=None):
         super().__init__(screen, background_color, soundtrack=soundtrack)
         self._background_image = pygame.image.load(assets.get('menu-title'))
         self._background_image = pygame.transform.scale(self._background_image, self._screen.get_size())
         self._selected_difficulty = None
+        self.easy_button = button.Button(200, 400, self.easy_image, 0.8)
+        self.medium_button = button.Button(500, 400, self.medium_image, 0.8)
+        self.hard_button = button.Button(800, 400, self.hard_image, 0.8)
 
     def draw(self):
         super().draw()
@@ -178,7 +178,6 @@ class Freemode(Scene):
         self._total_spawned = 0
         self._max_targets = 30
         self._scoreboard = scoreboard.Scoreboard()
-        self._particle_system = ParticleSystem()
         
         #Creates retry and main menu buttons
         retry_image = pygame.image.load(assets.get('retry'))
@@ -246,8 +245,7 @@ class Freemode(Scene):
         for target in targets_to_remove:
             self._scoreboard.record_miss()
             self._targets.remove(target)
-
-        self._particle_system.update()
+        
         self._targets.update()
 
     def _spawn_target(self):
@@ -261,7 +259,6 @@ class Freemode(Scene):
     def draw(self):
         super().draw()
         self._targets.draw(self._screen)
-        self._particle_system.draw(self._screen)
         self._scoreboard.draw(self._screen)
         
         #Show retry and main buttons when all targets are spawned
@@ -285,7 +282,6 @@ class Freemode(Scene):
                 if not target.is_clicked() and target.contains_point(event.pos):
                     target.click()
                     self._scoreboard.record_hit()
-                    self._particle_system.emit(*event.pos, color=(220, 50, 50))  # particle hit
                     self._targets.remove(target)
     
     def is_retry_clicked(self):
@@ -336,12 +332,22 @@ class Rush(Scene):
         self._timer_running = False
         self._timer_end_time = None
 
+    def _get_target_radius(self):
+        """Get target radius based on difficulty."""
+        radius = {
+            "easy": 50,
+            "medium": 35,
+            "hard": 20
+        }
+        return radius.get(self._difficulty, 35)
+
     def _spawn_all_targets(self):
         """Spawn all 5 targets at random locations."""
+        radius = self._get_target_radius()
         for _ in range(self._max_targets):
             x = random.randint(50, self._screen.get_width() - 50)
             y = random.randint(50, self._screen.get_height() - 50)
-            new_target = target.Target(x, y)
+            new_target = target.Target(x, y, radius=radius)
             self._targets.add(new_target)
             self._total_spawned += 1
 
@@ -437,5 +443,53 @@ class Rush(Scene):
 
 
 class Random(Scene):
-    pass
+    def __init__(self, screen, background_color, soundtrack=None, difficulty=None):
+        super().__init__(screen, background_color, soundtrack=soundtrack)
+        self._difficulty = difficulty
+        self._targets = pygame.sprite.Group()
+        self._spawn_rate = self._get_spawn_rate(difficulty)
+        self._last_spawn_time = pygame.time.get_ticks()
+        self._scoreboard = scoreboard.Scoreboard()
+        
+        # 30 second timer
+        self._game_start_time = pygame.time.get_ticks()
+        self._game_duration = 30000  # 30 seconds in milliseconds
+        self._game_complete = False
+        self._timer_font = pygame.font.Font(assets.get('pixel-font'), 30)
+        
+        # Creates retry and main menu buttons
+        retry_image = pygame.image.load(assets.get('retry'))
+        self._retry_button = button.Button(300, 375, retry_image, 0.8)
+        self._show_retry_button = False
 
+        main_image = pygame.image.load(assets.get('main'))
+        self._main_button = button.Button(700, 375, main_image, 0.8)
+        self._show_main_button = False
+        
+        # Button delay 
+        self._button_delay = 750  
+        self._delay_start_time = None
+        
+        # Button action
+        self._retry_clicked = False
+        self._main_clicked = False
+
+    def _get_spawn_rate(self, difficulty):
+        #Spawn time based on difficulty
+        rates = {
+            "easy": 950,
+            "medium": 850,
+            "hard": 750
+        }
+        return rates.get(difficulty, 1000)
+    
+    def _get_despawn_time(self, difficulty):
+        #Despawn time based on difficulty
+        times = {
+            "easy": 900,
+            "medium": 800,
+            "hard": 700
+
+        }
+        despawn = times.get(difficulty, 1000)
+        return despawn
