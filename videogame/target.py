@@ -1,4 +1,4 @@
-"""Target sprite for Aim Assist game"""
+"Target sprite"
 
 import pygame
 import math
@@ -7,8 +7,6 @@ from videogame import color_library
 
 
 class Target(pygame.sprite.Sprite):
-    """A clickable target that disappears when clicked"""
-
     #Ring colors
     RING_COLORS = [
         color_library.red,
@@ -18,7 +16,7 @@ class Target(pygame.sprite.Sprite):
         color_library.red,
     ]
     
-    """Initialize target with a given radius"""
+    "Initialize target with a given radius"
     def __init__(self, x, y, radius=35):
         super().__init__()
         self._radius = radius
@@ -43,7 +41,7 @@ class Target(pygame.sprite.Sprite):
         cy = self._radius + 2
         r = self._radius
 
-        #Circle shadow
+        #Circles shadow
         shadow_surf = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
         pygame.draw.circle(shadow_surf, (0, 0, 0, 60), (cx + 3, cy + 3), r)
         self.image.blit(shadow_surf, (0, 0))
@@ -53,11 +51,11 @@ class Target(pygame.sprite.Sprite):
             ring_r = int(r * (num_rings - i) / num_rings)
             pygame.draw.circle(self.image, color, (cx, cy), ring_r)
 
-        #Circle outer border
+        #Circles outer border
         pygame.draw.circle(self.image, (180, 30, 30), (cx, cy), r, 2)
 
     
-    """Scaled version during animation"""
+    "Scaled version during animation"
     def _draw_scaled(self, scale):
         self.image.fill((0, 0, 0, 0))
         cx = self._radius + 2
@@ -78,24 +76,23 @@ class Target(pygame.sprite.Sprite):
                 self._popping_in = False
                 self._draw()
 
-    """Mark the target as clicked"""
+    #Mark the target as clicked
     def click(self):
         self._clicked = True
 
-    """Return True if target has been clicked"""
+    #Return True if target has been clicked
     def is_clicked(self):
         return self._clicked
 
-    """Return time when the target is spawned"""
+    #Return time when the target is spawned
     def get_spawn_time(self):
         return self._spawn_time
 
-    """Return time since spawn."""
+    #Return time since spawn
     def get_reaction_time(self):
         return pygame.time.get_ticks() - self._spawn_time
     
     
-    """Return True if pos (x, y) is within this target's circle"""
     def contains_point(self, pos):
         dx = pos[0] - self._x
         dy = pos[1] - self._y
@@ -114,7 +111,7 @@ class Target(pygame.sprite.Sprite):
         return self._radius
 
 
-"""Create target at random positions inside screen borders"""
+#Create target at random positions inside screen borders
 def random_target(screen_width, screen_height, radius=35, margin=60):
     x = random.randint(margin + radius, screen_width - margin - radius)
     y = random.randint(margin + radius + 60, screen_height - margin - radius)

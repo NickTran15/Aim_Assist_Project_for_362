@@ -1,10 +1,9 @@
-# Scoreboard for Aim Assist Game
+"Scoreboard for Aim Assist Game"
 
 import pygame
 from videogame import assets
 
 class Scoreboard:
-    """Keeps track of hits and misses"""
     def __init__(self, x=20, y=20, font_size=30):
         self.hits = 0
         self.misses = 0
@@ -16,7 +15,6 @@ class Scoreboard:
 
     @property
     def accuracy(self):
-        """Calculates accuracy"""
         total_shots = self.hits + self.misses
 
         if total_shots == 0:
@@ -31,7 +29,6 @@ class Scoreboard:
         self.misses += 1
 
     def draw(self, screen):
-        """Draws scoreboard on screen"""
         text = f"Hits: {self.hits} | Accuracy: {self.accuracy:.1f}%"
         text_surface = self.font.render(text, True, (255, 255, 255))
         screen.blit(text_surface, self.position)

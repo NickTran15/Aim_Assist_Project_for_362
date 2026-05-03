@@ -1,6 +1,4 @@
-"DONE"
-
-#Handles all button functions
+"Handles all button functions"
 
 import pygame
 

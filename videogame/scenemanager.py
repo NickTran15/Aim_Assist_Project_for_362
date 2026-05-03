@@ -1,6 +1,4 @@
-"DONE"
-#Manages scene transistions
-
+"Manages scene transistions"
 
 class SceneManager:
 

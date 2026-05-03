@@ -1,6 +1,5 @@
-"Different Game Scenes"
-#git config pull.rebase false
-#
+#Different game scenes
+
 import pygame
 from videogame import assets, color_library, button, target, scoreboard
 import random
@@ -56,7 +55,6 @@ class Scene:
             pygame.mixer.music.play(loops=-1, fade_ms=500)
 
     def end_scene(self):
-        """End the scene."""
         if self._soundtrack and pygame.mixer.music.get_busy():
             pygame.mixer.music.fadeout(500)
             pygame.mixer.music.stop()
@@ -87,8 +85,8 @@ class TitleScene(NextScene):
 class MainMenuScene(Scene):
     menu_title = pygame.image.load(assets.get('menu-title'))
     freemode_image = pygame.image.load(assets.get('freemode'))
-    rush_image = pygame.image.load(assets.get('rush'))
-    random_image = pygame.image.load(assets.get('random'))
+    rush_image = pygame.image.load(assets.get('random'))
+    random_image = pygame.image.load(assets.get('rush'))
     quit_image = pygame.image.load(assets.get('quit'))
 
     def __init__(self, screen, background_color, soundtrack=None):
@@ -167,7 +165,7 @@ class DifficultyScene(Scene):
         return self._selected_difficulty
 
 
-
+"Freemode gamemode"
 class Freemode(Scene):
     def __init__(self, screen, background_color, soundtrack=None, difficulty=None):
         super().__init__(screen, background_color, soundtrack=soundtrack)
@@ -218,7 +216,7 @@ class Freemode(Scene):
         return despawn
 
     def update_scene(self):
-        """Spawn targets and update existing targets."""
+        "Spawn targets and update existing targets"
         current_time = pygame.time.get_ticks()
         if current_time - self._last_spawn_time > self._spawn_rate and self._total_spawned < self._max_targets:
             self._spawn_target()
@@ -249,7 +247,7 @@ class Freemode(Scene):
         self._targets.update()
 
     def _spawn_target(self):
-        """Spawn a new target at a random location."""
+        "Spawn a new target at a random location"
         x = random.randint(50, self._screen.get_width() - 50)
         y = random.randint(50, self._screen.get_height() - 50)
         new_target = target.Target(x, y)
@@ -292,14 +290,13 @@ class Freemode(Scene):
     
 
 
-
-
+"Rush gamemode"
 class Rush(Scene):
     def __init__(self, screen, background_color, soundtrack=None, difficulty=None):
         super().__init__(screen, background_color, soundtrack=soundtrack)
         self._difficulty = difficulty
         self._targets = pygame.sprite.Group()
-        self._max_targets = 5
+        self._max_targets = 10
         self._total_spawned = 0
         self._scoreboard = scoreboard.Scoreboard()
         
@@ -333,7 +330,7 @@ class Rush(Scene):
         self._timer_end_time = None
 
     def _get_target_radius(self):
-        """Get target radius based on difficulty."""
+        "Get target radius based on difficulty"
         radius = {
             "easy": 50,
             "medium": 35,
@@ -342,7 +339,7 @@ class Rush(Scene):
         return radius.get(self._difficulty, 35)
 
     def _spawn_all_targets(self):
-        """Spawn all 5 targets at random locations."""
+        "Spawn all 5 targets at random locations"
         radius = self._get_target_radius()
         for _ in range(self._max_targets):
             x = random.randint(50, self._screen.get_width() - 50)
@@ -352,7 +349,7 @@ class Rush(Scene):
             self._total_spawned += 1
 
     def update_scene(self):
-        """Update Rush scene - handle countdown and target management."""
+        "Handles countdown and target management"
         current_time = pygame.time.get_ticks()
         
         #Check if countdown is over
@@ -362,7 +359,7 @@ class Rush(Scene):
                 #Spawns all 5 targets
                 self._spawn_all_targets()
                 self._delay_start_time = pygame.time.get_ticks()
-                # Start the timer
+                #Start the timer
                 self._timer_start_time = pygame.time.get_ticks()
                 self._timer_running = True
         
@@ -382,7 +379,6 @@ class Rush(Scene):
                     self._show_main_button = True
 
     def draw(self):
-        """Draw the Rush scene."""
         super().draw()
         
         current_time = pygame.time.get_ticks()
@@ -425,7 +421,6 @@ class Rush(Scene):
                 print("Main menu clicked")
 
     def process_event(self, event):
-        """Handle events in Rush scene."""
         super().process_event(event)
         
         if event.type == pygame.MOUSEBUTTONDOWN and self._countdown_complete:
@@ -451,13 +446,13 @@ class Random(Scene):
         self._last_spawn_time = pygame.time.get_ticks()
         self._scoreboard = scoreboard.Scoreboard()
         
-        # 30 second timer
+        #30 second timer
         self._game_start_time = pygame.time.get_ticks()
-        self._game_duration = 30000  # 30 seconds in milliseconds
+        self._game_duration = 30000
         self._game_complete = False
         self._timer_font = pygame.font.Font(assets.get('pixel-font'), 30)
         
-        # Creates retry and main menu buttons
+        #Creates retry and main menu buttons
         retry_image = pygame.image.load(assets.get('retry'))
         self._retry_button = button.Button(300, 375, retry_image, 0.8)
         self._show_retry_button = False
@@ -466,11 +461,11 @@ class Random(Scene):
         self._main_button = button.Button(700, 375, main_image, 0.8)
         self._show_main_button = False
         
-        # Button delay 
+        #Button delay 
         self._button_delay = 750  
         self._delay_start_time = None
         
-        # Button action
+        #Button action
         self._retry_clicked = False
         self._main_clicked = False
 
@@ -493,3 +488,102 @@ class Random(Scene):
         }
         despawn = times.get(difficulty, 1000)
         return despawn
+    
+    def update_scene(self):
+        "Handles countdown and target spawning"
+        current_time = pygame.time.get_ticks()
+        
+        #Check if countdown is complete
+        countdown_elapsed = current_time - self._game_start_time
+        if countdown_elapsed < 3000:
+            return
+        
+        #Countdown is over check if need to spawn the first target
+        if len(self._targets) == 0 and not self._game_complete:
+            self._spawn_target()
+        
+        #Calculate time remaining
+        spawning_time_elapsed = countdown_elapsed - 3000
+        
+        if spawning_time_elapsed >= self._game_duration:
+            if not self._game_complete:
+                self._game_complete = True
+                self._delay_start_time = pygame.time.get_ticks()
+            
+            #Show buttons after delay
+            if self._delay_start_time and current_time - self._delay_start_time > self._button_delay:
+                self._show_retry_button = True
+                self._show_main_button = True
+        
+        #Keep targets until clicked or time runs out
+        self._targets.update()
+    
+    def _spawn_target(self):
+        "Spawn a new target at a random location"
+        x = random.randint(50, self._screen.get_width() - 50)
+        y = random.randint(50, self._screen.get_height() - 50)
+        new_target = target.Target(x, y)
+        self._targets.add(new_target)
+    
+    def draw(self):
+        super().draw()
+        
+        current_time = pygame.time.get_ticks()
+        
+        #Draw countdown
+        countdown_elapsed = current_time - self._game_start_time
+        if countdown_elapsed < 3000:
+            remaining_time = max(0, (3000 - countdown_elapsed) // 1000 + 1)
+            countdown_font = pygame.font.Font(assets.get('pixel-font'), 150)
+            countdown_text = countdown_font.render(str(remaining_time), True, color_library.white)
+            text_rect = countdown_text.get_rect(center=self._screen.get_rect().center)
+            self._screen.blit(countdown_text, text_rect)
+        else:
+            #Draw timer and scoreboard only if game is not complete
+            if not self._game_complete:
+                spawning_time_elapsed = countdown_elapsed - 3000
+                remaining_spawn_time = max(0, (self._game_duration - spawning_time_elapsed) / 1000.0)
+                timer_text = self._timer_font.render(f"{remaining_spawn_time:.2f}s", True, color_library.white)
+                timer_rect = timer_text.get_rect(topright=(self._screen.get_width() - 20, 20))
+                self._screen.blit(timer_text, timer_rect)
+                self._scoreboard.draw(self._screen)
+            else:
+                #Game complete: display hits in center above buttons
+                hits_font = pygame.font.Font(assets.get('pixel-font'), 60)
+                hits_text = hits_font.render(f"Targets Hit: {self._scoreboard.hits}", True, color_library.white)
+                hits_rect = hits_text.get_rect(center=(self._screen.get_width() // 2, 250))
+                self._screen.blit(hits_text, hits_rect)
+        
+        #Draw targets
+        self._targets.draw(self._screen)
+        
+        #Show retry and main buttons
+        if self._show_retry_button:
+            if self._retry_button.draw(self._screen):
+                self._retry_clicked = True
+                self._is_valid = False
+                print("Retry clicked")
+
+        if self._show_main_button:
+            if self._main_button.draw(self._screen):
+                self._main_clicked = True
+                self._is_valid = False
+                print("Main menu clicked")
+    
+    def process_event(self, event):
+        super().process_event(event)
+        
+        #Only allow clicking after countdown is complete
+        countdown_elapsed = pygame.time.get_ticks() - self._game_start_time
+        if countdown_elapsed >= 3000 and event.type == pygame.MOUSEBUTTONDOWN:
+            for target_obj in self._targets:
+                if not target_obj.is_clicked() and target_obj.contains_point(event.pos):
+                    target_obj.click()
+                    self._scoreboard.record_hit()
+                    self._targets.remove(target_obj)
+    
+    def is_retry_clicked(self):
+        return self._retry_clicked
+    
+    def is_main_clicked(self):
+        return self._main_clicked

@@ -6,7 +6,7 @@ from videogame import scene
 from videogame import scenemanager
 
 def display_info():
-    """Print out information about the display driver and video information."""
+    "Print out information about the display driver and video information"
     print(f'The display is using the "{pygame.display.get_driver()}" driver.')
     print("Video Info:")
     print(pygame.display.Info())
@@ -79,7 +79,7 @@ class Aim_Assist(VideoGame):
         )
 
     def run(self):
-        """Run the game; the main game loop."""
+        "Run the game; the main game loop"
         scene_iterator = iter(self._scene_manager)
         current_scene = next(scene_iterator)
         selected_mode = None
@@ -88,7 +88,7 @@ class Aim_Assist(VideoGame):
         while not self._game_is_over:
             current_scene.start_scene()
             
-            # Main scene loop
+            #Main scene loop
             while current_scene.is_valid():
                 current_scene.delta_time = self._clock.tick(
                     current_scene.frame_rate()
@@ -99,7 +99,7 @@ class Aim_Assist(VideoGame):
                 current_scene.draw()
                 pygame.display.update()
             
-            # Game scene has ended, show end-of-game screen with buttons
+            #Game scene ends, show end game screen with buttons
             if isinstance(current_scene, (scene.Freemode, scene.Rush, scene.Random)):
                 game_over = True
                 while game_over:
@@ -111,7 +111,7 @@ class Aim_Assist(VideoGame):
                             self._game_is_over = True
                             game_over = False
                         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                            # Escape goes back to main menu
+                            #Escape goes back to main menu
                             current_scene.end_scene()
                             current_scene = scene.MainMenuScene(
                                 self._screen,
@@ -126,9 +126,9 @@ class Aim_Assist(VideoGame):
                     current_scene.draw()
                     pygame.display.update()
                     
-                    # Check for button actions
+                    #Check button actions
                     if current_scene.is_retry_clicked():
-                        # Restart game scene with same difficulty
+                        #Restart game scene with same difficulty
                         current_scene.end_scene()
                         current_scene = type(current_scene)(
                             self._screen,
@@ -137,7 +137,7 @@ class Aim_Assist(VideoGame):
                         )
                         game_over = False
                     elif current_scene.is_main_clicked():
-                        # Go back to main menu
+                        #Go back to main menu
                         current_scene.end_scene()
                         current_scene = scene.MainMenuScene(
                             self._screen,
@@ -148,11 +148,19 @@ class Aim_Assist(VideoGame):
                         selected_difficulty = None
                         game_over = False
             else:
-                # For non-game scenes (Title, MainMenu, Difficulty)
-                # Capture selections before moving to next scene
+                #For non game scenes (Title, MainMenu, Difficulty)
+                #Capture selections before moving to next scene
                 if isinstance(current_scene, scene.MainMenuScene):
                     selected_mode = current_scene.get_selected_mode()
-                    # Move to difficulty scene
+                    #For random mode, go straight to game without difficulty selection
+                    if selected_mode == "random":
+                        current_scene.end_scene()
+                        current_scene = scene.Random(
+                            self._screen,
+                            color_library.sky_blue,
+                            difficulty=None
+                        )
+                        continue
                     current_scene.end_scene()
                     current_scene = scene.DifficultyScene(
                         self._screen,
@@ -162,7 +170,7 @@ class Aim_Assist(VideoGame):
                     continue
                 elif isinstance(current_scene, scene.DifficultyScene):
                     selected_difficulty = current_scene.get_selected_difficulty()
-                    # Create game scene based on selections
+                    #Create game scene based on gamemode select
                     if selected_mode == "freemode" and selected_difficulty:
                         current_scene.end_scene()
                         current_scene = scene.Freemode(

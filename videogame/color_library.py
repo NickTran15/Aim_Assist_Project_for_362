@@ -1,6 +1,4 @@
-"DONE"
-#Color library
-
+"Color library"
 
 dark_gray = (43, 49, 51)
 teal = (37, 186, 219)

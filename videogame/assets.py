@@ -1,5 +1,3 @@
-"DONE"
-
 "Logic to find game assets in asset dictionary"
 
 from os import path
